@@ -8,7 +8,8 @@ information.
 # Instalations
 
 ```sh
-rustup target add thumbv6m-none-eab
+rustup update
+rustup target add thumbv6m-none-eabi
 rustup target add thumbv7em-none-eabihf
 ```
 
@@ -16,6 +17,18 @@ rustup target add thumbv7em-none-eabihf
 brew install probe-rs-tools
 or
 cargo install probe-rs-tools 
+```
+
+# Run local
+
+```sh
+cargo run --bin ui --no-default-features --features bsp/board-sim,hal/stm32f405,hal/std,bsp/std,ui/std,ui/exit
+```
+
+# Build all
+
+```sh
+make
 ```
 
 
@@ -77,24 +90,6 @@ cd crates/mgmt; cargo flash --chip STM32F072CB --bin mgmt --no-default-features 
 ```
 
 
-# Running on Emulator
-
-Does not work yet.
-
-```sh
-TBD broken
-cargo build --features bsp/board-qemu,exit --target=thumbv7em-none-eabihf 
-qemu-system-arm  -S -no-reboot -cpu cortex-m4  -machine netduinoplus2  -gdb tcp::3333  -nographic  -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabihf/debug/ui  --trace "memory_region_ops_*" 
-arm-none-eabi-gdb -q  target/thumbv7em-none-eabihf/debug/ui --init-eval-command="target extended-remote localhost:3333"
-```
-
-The -S cause the above to wait for the debugger to connect.
-
-# Running on the Simulator
-
-```aiignore
-make run-sim
-```
 
 # Notes
 
@@ -102,15 +97,11 @@ Useful things to look at size of binary:
 
 ```aiignore
 cd crates/ui
-cargo build  --release
+cargo build  --release  --no-default-features --features bsp/board-hactar12,hal/stm32f405 --target=thumbv7em-none-eabihf 
 arm-none-eabi-size ../../target/thumbv7em-none-eabihf/release/ui 
 cargo nm --release -- -a -n
 
-cargo objdump --bin mgmt --no-default-features --features hal/stm32f072 --target=thumbv6m-none-eabi   --  --disassemble-symbols="mgmt::my_main::h198d2405b1d924dc"  --source   --demangle
-
-cargo objdump --bin mgmt --no-default-features --features hal/stm32f072 --target=thumbv6m-none-eabi   --  --disassemble-all  --source   --demangle
-
- cargo objdump --release  --bin ui --no-default-features --features bsp/board-hactar12,hal/stm32f405 --target=thumbv7em-none-eabihf  --  --disassemble-symbols="ui::fib::fib::h66fa5b0d20d9db18"  --source   --demangle
+cargo objdump --release  --bin ui --no-default-features --features bsp/board-hactar12,hal/stm32f405 --target=thumbv7em-none-eabihf  --  --disassemble-symbols="ui::fib::fib::h66fa5b0d20d9db18"  --source   --demangle
 
 cargo objdump  --bin ui --no-default-features --features bsp/board-hactar12,hal/stm32f405 --target=thumbv7em-none-eabihf  --  --disassemble-symbols="ui::fib::fib::hc749cb1bc8cd917c"  --source   --demangle
 
